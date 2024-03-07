@@ -1,7 +1,9 @@
 @testset "Preprocessing" begin
     @testset "Scaling transforms" begin
         FT = Float32
-        x = randn(FT,(64,64,3,100))
+        nx = 64
+        ny = 32
+        x = randn(FT,(nx, ny,3,100))
         min_values = minimum(x, dims = (1,2,4))
         max_values = maximum(x, dims = (1,2,4))
         Δ = max_values .- min_values

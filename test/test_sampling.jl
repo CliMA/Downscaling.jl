@@ -3,7 +3,9 @@
     σ_min = FT(1e-2)
     σ_max = FT(1)
     model = VarianceExplodingSDE{FT, typeof(net)}(σ_max, σ_min, net)
-    init_x = rand(Float32, 32, 32, 1, 1)
+    nx = 32
+    ny = 16
+    init_x = rand(Float32, nx, ny, 1, 1)
     ϵ=FT(1.0f-3)
     num_steps = 2
     time_steps = LinRange(FT(1.0), ϵ, num_steps)

@@ -26,14 +26,16 @@ end
     @test typeof(circ_conv.conv) == typeof(conv)
     circ_conv.conv.weight .= 1.0f0
     conv.weight .= 1.0f0
-    x = randn(FT, 8, 8, 1, 1)
+    nx = 8
+    ny = 16
+    x = randn(FT, nx, ny, 1, 1)
     y = circ_conv(x)
     circ_x = NNlib.pad_circular(x, circ_conv.pad)
     @test circ_x[3:end-2,3:end-2,:,:] == x
-    @test circ_x[[1, 2], 3:end-2, :, :] == x[[7, 8], :, :, :]
-    @test circ_x[[11, 12], 3:end-2, :, :] == x[[1, 2], :, :, :]
-    @test circ_x[3:end-2,[1,2], :, :] == x[:, [7, 8], :, :]
-    @test circ_x[3:end-2,[11,12], :, :] == x[:, [1, 2], :, :]
+    @test circ_x[[1, 2], 3:end-2, :, :] == x[nx-1:nx, :, :, :]
+    @test circ_x[nx+kernel_size-2:nx+kernel_size-1, 3:end-2, :, :] == x[[1, 2], :, :, :]
+    @test circ_x[3:end-2,[1,2], :, :] == x[:, ny-1:ny, :, :]
+    @test circ_x[3:end-2,ny+kernel_size-2:ny+kernel_size-1, :, :] == x[:, [1, 2], :, :]
     @test y == conv(circ_x)
 end
 
@@ -87,7 +89,9 @@ end
 
     ps = Flux.params(net)
     k = 5
-    x = rand(Float32, 2^k, 2^k, 2, 11)
+    nx = 2^k
+    ny = 2^(k-1)
+    x = rand(Float32, nx, ny, 2, 11)
     c=nothing
     t = rand(Float32)
     # forward pass
@@ -110,7 +114,7 @@ end
     mean_bypass_net = CliMAgen.NoiseConditionalScoreNetwork(;noised_channels=2, shift_input=true, shift_output=true, mean_bypass=true)
     ps = Flux.params(net)
     k = 5
-    x = rand(Float32, 2^k, 2^k, 2, 11)
+    x = rand(Float32, nx, ny, 2, 11)
     t = rand(Float32)
     # forward pass
     @test  mean_bypass_net(x, c, t) |> size == size(x)
@@ -128,11 +132,13 @@ end
     net = CliMAgen.NoiseConditionalScoreNetwork(context=true, noised_channels=2, context_channels = 3)
     ps = Flux.params(net)
     k = 5
-    x = rand(Float32, 2^k, 2^k, 2, 11)
-    c = rand(Float32, 2^k, 2^k, 3, 11)
+    nx = 2^k
+    ny = 2^(k-1)
+    x = rand(Float32, nx, ny, 2, 11)
+    c = rand(Float32, nx, ny, 3, 11)
     t = rand(Float32)
     # forward pass
-    @test net(x, c, t) |> size == (2^k, 2^k, 2, 11)
+    @test net(x, c, t) |> size == (nx, ny, 2, 11)
 
     # backward pass of dummy loss
     loss, grad = Flux.withgradient(ps) do
@@ -144,10 +150,10 @@ end
     net2 = CliMAgen.NoiseConditionalScoreNetwork(noised_channels=3)
     ps = Flux.params(net2)
     k = 5
-    x = rand(Float32, 2^k, 2^k, 3, 11)
+    x = rand(Float32, nx, ny, 3, 11)
     t = rand(Float32)
     # forward pass
-    @test net2(x, nothing, t) |> size == (2^k, 2^k, 3, 11)
+    @test net2(x, nothing, t) |> size == (nx, ny, 3, 11)
 
     # backward pass of dummy loss
     loss, grad = Flux.withgradient(ps) do

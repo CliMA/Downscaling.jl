@@ -1,6 +1,7 @@
 using CliMAgen
-using CUDA
 using Flux
+using CUDA
+using cuDNN
 using Test
 using Random
 using Statistics
