@@ -194,3 +194,34 @@ end
     end
     @test loss isa Real
 end
+
+@testset "ControlNet" begin
+    # constructor
+    net = Dense(10, 5)
+    controlnet = CliMAgen.ControlNet(net, trainable=true)
+    @test controlnet.net == net
+    @test controlnet.trainable == true
+
+    x = randn(10)
+    @test controlnet(x) == net(x)
+end
+
+@testset "ControlledNoiseConditionalScoreNetwork" begin
+    # with controlnet
+    control_net = CliMAgen.ControlNet(Dense(11, 256), trainable=true)
+    net = CliMAgen.ControlledNoiseConditionalScoreNetwork(control_net=control_net, noised_channels=2)
+    ps = Flux.params(net)
+    k = 5
+    x = rand(Float32, 2^k, 2^k, 2, 11)
+    c = rand(Float32, 11)
+    t = rand(Float32)
+
+    # forward pass
+    @test net(x, c, t) |> size == (2^k, 2^k, 2, 11)
+
+    # backward pass of dummy loss
+    loss, grad = Flux.withgradient(ps) do
+        sum(net(x, c, t) .^ 2)
+    end
+    @test loss isa Real
+end

@@ -35,9 +35,10 @@ export struct2dict, dict2nt
 export VarianceExplodingSDE
 export drift, diffusion, marginal_prob, score
 export vanilla_score_matching_loss, score_matching_loss
-export NoiseConditionalScoreNetwork, DenoisingDiffusionNetwork, ResnetBlockDDN, ResnetBlockNCSN, AttentionBlock, CircularConv
+export NoiseConditionalScoreNetwork, DenoisingDiffusionNetwork, ResnetBlockDDN, ResnetBlockNCSN, AttentionBlock, CircularConv, ControlledNoiseConditionalScoreNetwork
 export WarmupSchedule, ExponentialMovingAverage
 export train!, load_model_and_optimizer, save_model_and_optimizer
 export setup_sampler, Euler_Maruyama_sampler, Euler_Maruyama_ld_sampler, predictor_corrector_sampler
 export MeanSpatialScaling, StandardScaling, apply_preprocessing, invert_preprocessing
+
 end
